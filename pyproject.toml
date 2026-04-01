@@ -1,0 +1,207 @@
+
+[project]
+name = "heiba_ai"
+dynamic = ["version"]
+description = "HEiBA AI: A Flexible yet Robust Multi-Agent Platform."
+readme = "README.md"
+authors = [
+    { name = "SysML team of Alibaba Tongyi Lab", email = "gaodawei.gdw@alibaba-inc.com" }
+]
+license = "Apache-2.0"
+keywords = ["deep-learning", "multi agents", "agents"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "aioitertools",
+    "anthropic",
+    "dashscope",
+    "docstring_parser",
+    "filetype",
+    "json5",
+    "json_repair",
+    "mcp>=1.13",
+    "numpy",
+    "openai",
+    "python-datauri",
+    "opentelemetry-api>=1.39.0",
+    "opentelemetry-sdk>=1.39.0",
+    "opentelemetry-exporter-otlp>=1.39.0",
+    "opentelemetry-semantic-conventions>=0.60b0",
+    "python-socketio",
+    "shortuuid",
+    "tiktoken",
+    "sounddevice",
+    "sqlalchemy",
+    "python-frontmatter",
+    "aiofiles",
+]
+
+[project.optional-dependencies]
+# ------------ A2A protocol ------------
+a2a = [
+    "a2a-sdk",
+    "httpx",
+    # TODO: split the card resolvers from the a2a dependency
+    "nacos-sdk-python>=3.0.0",
+]
+
+# ------------ Realtime -------------
+realtime = ["websockets>=14.0", "scipy"]
+
+# ------------ Model APIs ------------
+gemini = ["google-genai"]
+ollama = ["ollama>=0.5.4"]
+models = [
+    "heiba_ai[ollama]",
+    "heiba_ai[gemini]",
+]
+
+# ------------ Tokenizers ------------
+tokens = [
+    "Pillow",
+    "transformers",
+    "jinja2",
+]
+
+# ------------ Memory ------------
+redis_memory = ["redis"]
+
+mem0ai = [
+    "mem0ai<=1.0.3",
+    "packaging"
+]
+reme = ["reme-ai>=0.2.0.3"]
+memory = [
+    "heiba_ai[redis_memory]",
+    "heiba_ai[mem0ai]",
+    "heiba_ai[reme]",
+]
+
+# ------------ RAG ------------
+# readers
+text-reader = ["nltk"]
+pdf-reader = [
+    "heiba_ai[text-reader]",
+    # TODO: the latest pypdf has some issues with parsing PDFs
+    #  (2026-01-13), so we fix the version here temporarily.
+    "pypdf<=6.5.0",
+]
+docx-reader = [
+    "heiba_ai[text-reader]",
+    "python-docx"
+]
+excel-reader = [
+    "heiba_ai[text-reader]",
+    "pandas",
+    "openpyxl",
+]
+ppt-reader = [
+    "heiba_ai[text-reader]",
+    "python-pptx"
+]
+readers = [
+    "heiba_ai[text-reader]",
+    "heiba_ai[pdf-reader]",
+    "heiba_ai[docx-reader]",
+    "heiba_ai[excel-reader]",
+    "heiba_ai[ppt-reader]",
+]
+
+# vdb
+# The qdrant-client >= 1.16.0 has conflicts with pymilvus, so we fix
+# the version to 1.15.1 here.
+qdrant = ["qdrant-client==1.15.1"]
+milvus = ["pymilvus[milvus_lite]==2.6.2"]
+ali_mysql = ["mysql-connector-python"]
+mongodb = ["pymongo"]
+oceanbase = ["pyobvector>=0.2.0,<0.3.0"]
+vdbs = [
+    "heiba_ai[ali_mysql]",
+    "heiba_ai[qdrant]",
+    "heiba_ai[milvus]",
+    "heiba_ai[mongodb]",
+    "heiba_ai[oceanbase]",
+]
+
+rag = [
+    "heiba_ai[readers]",
+    "heiba_ai[vdbs]",
+]
+
+# ------------ Evaluation ------------
+evaluate = ["ray"]
+
+# ------------ Tuner ------------
+tuner = [
+    "dspy>=3.1.0",
+    "datasets>=4.0.0",
+    "litellm[proxy]>=1.75.3",
+]
+
+tuner-gpu = [
+    "trinity-rft>=0.5.0",
+    "dspy>=3.1.0",
+    "datasets>=4.0.0",
+    "litellm[proxy]>=1.75.3"
+]
+
+# ------------ Full ------------
+full = [
+    "heiba_ai[a2a]",
+    "heiba_ai[models]",
+    "heiba_ai[tokens]",
+    "heiba_ai[memory]",
+    "heiba_ai[rag]",
+    "heiba_ai[evaluate]",
+    "heiba_ai[realtime]",
+]
+
+# ------------ Development ------------
+dev = [
+    # Include full dependencies from local package
+    "heiba_ai[full]",
+    # Development tools
+    "pre-commit",
+    "pytest",
+    "pytest-forked",
+    "sphinx-gallery",
+    "furo",
+    "myst_parser",
+    "matplotlib",
+    # For unittests
+    # For mocking redis in unittests
+    "fakeredis",
+    "aiosqlite",
+    "greenlet",
+    # For openjudge
+    "py-openjudge",
+    # For tuner
+    "dspy",
+]
+
+[project.urls]
+Homepage = "https://github.com/darklegend5/heiba-ai"
+Documentation = "https://doc.heiba_ai.io/"
+Repository = "https://github.com/darklegend5/heiba-ai"
+
+[tool.setuptools]
+packages = { find = { where = ["src"] } }
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "heiba_ai._version.__version__"}
